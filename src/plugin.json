@@ -1,0 +1,31 @@
+{
+  "type": "datasource",
+  "name": "Astarte appengine",
+  "id": "astarte-appengine-datasource",
+
+  "info": {
+    "description": "Astarte appengine Datasource plugin",
+    "author": {
+      "name": "Astarte",
+      "url": "https://astarte.cloud/"
+    },
+    "keywords": ["astarte", "appengine", "datasource"],
+    "logos": {
+      "small": "img/logo_small.png",
+      "large": "img/logo.png"
+    },
+    "links": [
+      {"name": "Project site", "url": "https://git.ispirata.com/Astarte-NG/astarte-appengine-datasource"}
+    ],
+    "version": "0.9.0",
+    "updated": "2018-07-30"
+  },
+
+  "dependencies": {
+    "grafanaVersion": "4.5.x",
+    "plugins": [ ]
+  },
+
+  "metrics": true,
+  "annotations": false
+}
