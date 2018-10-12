@@ -2,48 +2,6 @@
 
 import _ from 'lodash';
 
-class AstarteQuery {
-    server: string;
-    realm: string;
-    deviceid: string;
-    interface: string;
-    path: string;
-
-    since: Date;
-    to: Date;
-    downsample_to: number;
-
-    constructor(_server, _realm, _deviceid, _interface, _path, _since, _to, _samples) {
-        this.server = _server;
-        this.realm = _realm;
-        this.deviceid = _deviceid;
-        this.interface = _interface;
-        this.path = _path ? _path : "";
-        this.since = _since ? _since : null;
-        this.to = _to ? _to : null;
-        this.downsample_to = _samples > 0 ? _samples : 0;
-    }
-
-    toString() {
-        let query: string = `${this.server}/${this.realm}/devices/${this.deviceid}/interfaces/${this.interface}`
-        if (this.path) {
-            query += `/${this.path}`;
-        }
-        query += `?format=disjoint_tables&keep_milliseconds=true`;
-        if (this.since) {
-            query += `&since=${this.since.toISOString()}`;
-        }
-        if (this.to) {
-            query += `&to=${this.to.toISOString()}`;
-        }
-        if (this.downsample_to) {
-            query += `&downsample_to=${Math.floor(this.downsample_to)}`;
-        }
-
-        return encodeURI(query);
-    }
-}
-
 export default class AstarteDatasource {
     id: number;
     name: string;
@@ -60,6 +18,62 @@ export default class AstarteDatasource {
         this.token = instanceSettings.jsonData.token;
     }
 
+    baseQueryPath() {
+        return `${this.server}/${this.realm}`;
+    }
+
+    isBase64Id(deviceId) {
+        return /^([A-Za-z0-9]|%2B|%2F|%3D){22}$/g.test(deviceId);
+    }
+
+    buildInterfacesQuery(deviceId) {
+        let query: string = this.baseQueryPath();
+
+        if (this.isBase64Id(deviceId)) {
+            query += `/devices/${deviceId}/interfaces`;
+        } else {
+            query += `/devices-by-alias/${deviceId}/interfaces`;
+        }
+
+        return encodeURI(query);
+    }
+
+    buildEndpointQuery(deviceId, interfaceName, path, since, to, downsampleTo) {
+        let query: string = this.baseQueryPath();
+
+        if (this.isBase64Id(deviceId)) {
+            query += `/devices/${deviceId}`;
+        } else {
+            query += `/devices-by-alias/${deviceId}`;
+        }
+
+        query += `/interfaces/${interfaceName}`;
+
+        if (path) {
+            query += `/${path}`;
+        }
+        query += `?format=disjoint_tables&keep_milliseconds=true`;
+        if (since) {
+            query += `&since=${since.toISOString()}`;
+        }
+        if (to) {
+            query += `&to=${to.toISOString()}`;
+        }
+        if (downsampleTo > 0) {
+            query += `&downsample_to=${Math.floor(downsampleTo)}`;
+        }
+
+        return encodeURI(query);
+    }
+
+    runAstarteQuery(query) {
+        return this.backendSrv.datasourceRequest({
+            url: query,
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${this.token}` }
+        });
+    }
+
     query(options) {
         let from: Date = options.range.from._d;
         let to: Date = options.range.to._d;
@@ -67,22 +81,19 @@ export default class AstarteDatasource {
         let toTime: number = to.getTime();
 
         let interval: number = options.intervalMs;
-
-        //Build the query
-        let queries: AstarteQuery[] = [];
+        let promises: any[] = [];
+        let query: string;
+        let promise: any;
 
         for (let entry of options.targets) {
-            let query: AstarteQuery;
 
             if (entry.hide) {
                 continue;
             }
 
             if (entry.deviceid && entry.interface) {
-                query = new AstarteQuery
-                        ( this.server
-                        , this.realm
-                        , entry.deviceid
+                query = this.buildEndpointQuery
+                        ( entry.deviceid
                         , entry.interface
                         , entry.path
                         , from
@@ -90,35 +101,17 @@ export default class AstarteDatasource {
                         , (toTime - fromTime) / interval
                         );
 
-                queries.push(query);
+                promise = this.runAstarteQuery(query);
+
+                promises.push(promise.then(response => {
+                    response.deviceId = entry.deviceid;
+                    return response;
+                }));
             }
         }
 
-        if (queries.length <= 0) {
+        if (promises.length <= 0) {
             return this.$q.when({ data: [] });
-        }
-
-        //launch the query
-        let promises: any[] = [];
-        for (let entry of queries) {
-            let promise: any;
-            if (this.token) {
-                promise = this.backendSrv.datasourceRequest({
-                    url: entry.toString(),
-                    method: 'GET',
-                    headers: { 'Authorization': `Bearer ${this.token}` }
-                });
-            } else {
-                promise = this.backendSrv.datasourceRequest({
-                    url: entry.toString(),
-                    method: 'GET'
-                });
-            }
-
-            promises.push(promise.then(response => {
-                response.deviceId = entry.deviceid;
-                return response;
-            }));
         }
 
         let allPromises: any;
@@ -143,6 +136,7 @@ export default class AstarteDatasource {
                         }
                     }
                 }
+
             });
 
             return result;

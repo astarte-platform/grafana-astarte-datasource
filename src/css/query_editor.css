@@ -17,3 +17,31 @@
 .gf-form-select-wrapper--caret-indent.gf-form-select-wrapper::after {
   right: 0.775rem
 }
+
+.select-editable {
+    position: relative;
+    width: 220px;
+    height: 2.5rem;
+}
+
+.select-editable select {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 220px;
+}
+
+.select-editable input {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 200px;
+    height: 100%;
+    padding: 1px;
+    border: none;
+}
+
+.select-editable select:focus,
+.select-editable input:focus {
+    outline: none;
+}
