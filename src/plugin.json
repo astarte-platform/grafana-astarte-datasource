@@ -17,8 +17,8 @@
     "links": [
       {"name": "Project site", "url": "https://git.ispirata.com/Astarte-NG/astarte-appengine-datasource"}
     ],
-    "version": "0.9.0",
-    "updated": "2018-07-30"
+    "version": "0.10.0",
+    "updated": "2018-10-12"
   },
 
   "dependencies": {

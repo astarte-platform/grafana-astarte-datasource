@@ -1,8 +1,8 @@
 ///<reference path="../node_modules/grafana-sdk-mocks/app/headers/common.d.ts" />
 
 import _ from 'lodash';
-import {QueryCtrl} from 'app/plugins/sdk';
-import './css/query_editor.css!';
+import {QueryCtrl} from 'grafana/app/plugins/sdk';
+import './css/query_editor.css';
 
 export class AstarteQueryCtrl extends QueryCtrl {
   static templateUrl = 'partials/query.editor.html';
