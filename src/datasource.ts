@@ -114,31 +114,41 @@ export default class AstarteDatasource {
                     method: 'GET'
                 });
             }
+
             promises.push(promise.then(response => {
+                response.deviceId = entry.deviceid;
+                return response;
+            }));
+        }
+
+        let allPromises: any;
+        allPromises = this.$q.all(promises).then(results => {
+
+            let result: any = { data : [] };
+
+            _.forEach(results, function(response) {
+
                 if (response.status == 200) {
-                    let result: any = { data : [] };
                     let series: any = response.data.data;
                     //use for - in (instead of for - on) loop
                     //because data arrives in an associative array
                     for (let key in series) {
                         let timeSeries = series[key];
 
+                        let targetName = key + "[" + response.deviceId.substring(0, 5) + "]";
+
                         if (timeSeries.length && typeof timeSeries[0][0] === "number") {
                             //TODO: implement data column selection/filter
-                            result.data.push({ "target": key, "datapoints": timeSeries });
+                            result.data.push({ "target": targetName, "datapoints": timeSeries });
                         }
                     }
-
-                    return result;
-                } else {
-                    console.log(response);
-                    return { data: [] };
                 }
-            }));
-        }
+            });
 
-        //TODO: implement multiple GET requests
-        return promises[0];
+            return result;
+        });
+
+        return allPromises;
     }
 
   annotationQuery(options) {
