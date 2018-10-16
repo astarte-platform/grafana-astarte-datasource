@@ -3,11 +3,17 @@
     <div class="gf-form-inline">
       <div class="gf-form">
         <label class="gf-form-label query-keyword width-9">Device ID</label>
-        <input type="text" class="gf-form-input" ng-model="ctrl.target.deviceid" placeholder="{device-id}" ng-change="ctrl.refreshMetricData()" />
+        <input type="text" class="gf-form-input" ng-model="ctrl.target.deviceid" placeholder="{device-id}" ng-change="ctrl.refreshMetricData();ctrl.queryDevice()" />
       </div>
       <div class="gf-form">
         <label class="gf-form-label query-keyword width-9">Interface</label>
-        <input type="text" class="gf-form-input" ng-model="ctrl.target.interface" placeholder="{interface}" ng-change="ctrl.refreshMetricData()" />
+        <div class="select-editable">
+            <select onchange="this.nextElementSibling.value=this.value" ng-model="ctrl.target.interface" ng-change="ctrl.refreshMetricData()">
+                <option value=""></option>
+                <option ng-repeat="interface in ctrl.target.availableInterfaces" value="{{interface.name}}">{{interface.name}}</option>
+            </select>
+            <input type="text" class="gf-form-input" ng-model="ctrl.target.interface" placeholder="{interface}" ng-change="ctrl.refreshMetricData()" />
+        </div>
       </div>
       <div class="gf-form">
         <label class="gf-form-label query-keyword width-9">Path</label>
