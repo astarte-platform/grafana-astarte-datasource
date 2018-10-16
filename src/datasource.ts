@@ -23,7 +23,7 @@ export default class AstarteDatasource {
     }
 
     isBase64Id(deviceId) {
-        return /^([A-Za-z0-9]|%2B|%2F|%3D){22}$/g.test(deviceId);
+        return /^[A-Za-z0-9_\-]{22}$/g.test(deviceId);
     }
 
     buildInterfacesQuery(deviceId) {
