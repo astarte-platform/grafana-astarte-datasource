@@ -8,6 +8,7 @@ export class AstarteConfigCtrl {
     realm: string;
     token: string;
 
+    /** @ngInject **/
     constructor($scope) {
         this.server = $scope.ctrl.current.jsonData.server;
         this.realm = $scope.ctrl.current.jsonData.realm;
