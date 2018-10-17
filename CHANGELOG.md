@@ -12,8 +12,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Multi query support.
 
 ### Changed
-- Use textarea for token input
-- Migrate to webpack 4 build system
+- Use textarea for token input.
+- Migrate to webpack 4 build system.
 
 ## [0.10.0-beta.1] - 2018-08-27
 ### Added

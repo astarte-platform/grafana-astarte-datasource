@@ -153,15 +153,15 @@ export default class AstarteDatasource {
         return allPromises;
     }
 
-  annotationQuery(options) {
-    throw new Error("Annotation Support not implemented yet.");
-  }
+    annotationQuery(options) {
+        throw new Error("Annotation Support not implemented yet.");
+    }
 
-  metricFindQuery(query: string) {
-    throw new Error("Template Variable Support not implemented yet.");
-  }
+    metricFindQuery(query: string) {
+        throw new Error("Template Variable Support not implemented yet.");
+    }
 
-  testDatasource() {
-    return { status: "success", message: "Data source is working", title: "Success" };
-  }
+    testDatasource() {
+        return { status: "success", message: "Data source is working", title: "Success" };
+    }
 }
