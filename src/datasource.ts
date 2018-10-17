@@ -23,7 +23,7 @@ export default class AstarteDatasource {
     }
 
     isBase64Id(deviceId) {
-        return /^([A-Za-z0-9]|%2B|%2F|%3D){22}$/g.test(deviceId);
+        return /^[A-Za-z0-9_\-]{22}$/g.test(deviceId);
     }
 
     buildInterfacesQuery(deviceId) {
@@ -104,7 +104,13 @@ export default class AstarteDatasource {
                 promise = this.runAstarteQuery(query);
 
                 promises.push(promise.then(response => {
-                    response.deviceId = entry.deviceid;
+
+                    if (this.isBase64Id(entry.deviceid)) {
+                        response.deviceLabel = entry.deviceid.substring(0, 5);
+                    } else {
+                        response.deviceLabel = entry.deviceid;
+                    }
+
                     return response;
                 }));
             }
@@ -123,12 +129,14 @@ export default class AstarteDatasource {
 
                 if (response.status == 200) {
                     let series: any = response.data.data;
+                    let targetName: string;
+
                     //use for - in (instead of for - on) loop
                     //because data arrives in an associative array
                     for (let key in series) {
                         let timeSeries = series[key];
 
-                        let targetName = key + "[" + response.deviceId.substring(0, 5) + "]";
+                        targetName = `${key}[${response.deviceLabel}]`;
 
                         if (timeSeries.length && typeof timeSeries[0][0] === "number") {
                             //TODO: implement data column selection/filter
@@ -145,15 +153,15 @@ export default class AstarteDatasource {
         return allPromises;
     }
 
-  annotationQuery(options) {
-    throw new Error("Annotation Support not implemented yet.");
-  }
+    annotationQuery(options) {
+        throw new Error("Annotation Support not implemented yet.");
+    }
 
-  metricFindQuery(query: string) {
-    throw new Error("Template Variable Support not implemented yet.");
-  }
+    metricFindQuery(query: string) {
+        throw new Error("Template Variable Support not implemented yet.");
+    }
 
-  testDatasource() {
-    return { status: "success", message: "Data source is working", title: "Success" };
-  }
+    testDatasource() {
+        return { status: "success", message: "Data source is working", title: "Success" };
+    }
 }
