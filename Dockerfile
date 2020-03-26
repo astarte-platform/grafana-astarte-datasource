@@ -7,5 +7,5 @@ RUN apt-get -qq install netbase build-essential autoconf libffi-dev
 RUN npm install
 RUN npm run build
 
-FROM grafana/grafana:5.3.1
+FROM grafana/grafana:5.3.4
 COPY --from=builder /app/dist/ /var/lib/grafana/plugins/astarte-datasource/
