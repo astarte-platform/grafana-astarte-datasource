@@ -1,6 +1,6 @@
 {
     "name": "astarte-appengine-datasource",
-    "version": "0.11.2",
+    "version": "0.11.3",
     "description": "Astarte Data Source for Grafana.",
     "scripts": {
         "build": "webpack"
