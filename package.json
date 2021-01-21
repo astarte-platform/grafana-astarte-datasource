@@ -1,33 +1,28 @@
 {
-    "name": "astarte-appengine-datasource",
-    "version": "1.0.0-beta.1",
-    "description": "Astarte Data Source for Grafana.",
-    "scripts": {
-        "build": "webpack"
-    },
-    "author": "Astarte",
-    "license": "Apache-2.0",
-    "dependencies": {
-        "lodash": "^4.17.15",
-        "moment": "^2.18.1",
-        "q": "^1.5.0",
-        "systemjs": "^0.19.47"
-    },
-    "devDependencies": {
-        "@babel/core": "^7.0.0",
-        "@babel/preset-env": "^7.0.0",
-        "@types/grafana": "git+https://git@github.com/CorpGlory/types-grafana.git",
-        "@types/lodash": "^4.14.74",
-        "babel-loader": "^8.0.0",
-        "copy-webpack-plugin": "^4.6.0",
-        "css-loader": "^1.0.0",
-        "grafana-sdk-mocks": "github:grafana/grafana-sdk-mocks",
-        "plugin-typescript": "^7.1.0",
-        "style-loader": "^0.23.0",
-        "systemjs-plugin-css": "^0.1.35",
-        "ts-loader": "^4.5.0",
-        "typescript": "^3.0.1",
-        "webpack": "^4.42.1",
-        "webpack-cli": "^3.1.0"
-    }
+  "name": "astarte-appengine-datasource",
+  "version": "1.0.0-beta.1",
+  "description": "Astarte Data Source for Grafana.",
+  "scripts": {
+    "build": "grafana-toolkit plugin:build",
+    "test": "grafana-toolkit plugin:test",
+    "dev": "grafana-toolkit plugin:dev",
+    "watch": "grafana-toolkit plugin:dev --watch"
+  },
+  "author": "Astarte",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@grafana/data": "^7.3.10",
+    "@grafana/runtime": "^7.3.10",
+    "@grafana/toolkit": "^7.3.10",
+    "@grafana/ui": "^7.0.0",
+    "@testing-library/jest-dom": "5.4.0",
+    "@testing-library/react": "^10.0.2",
+    "@types/lodash": "latest"
+  },
+  "engines": {
+    "node": ">=12"
+  },
+  "resolutions": {
+    "rxjs": "6.6.3"
+  }
 }

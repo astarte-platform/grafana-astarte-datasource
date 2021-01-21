@@ -1,7 +1,7 @@
 /*
    This file is part of Astarte.
 
-   Copyright 2018 Ispirata Srl
+   Copyright 2018-2021 Ispirata Srl
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,17 +16,12 @@
    limitations under the License.
 */
 
-import AstarteDatasource from './datasource';
-import {AstarteQueryCtrl} from './query_ctrl';
-import {AstarteConfigCtrl} from './config_ctrl';
+import { DataSourcePlugin } from '@grafana/data';
+import { DataSource } from './DataSource';
+import { ConfigEditor } from './ConfigEditor';
+import { QueryEditor } from './QueryEditor';
+import { AppEngineQuery, AppEngineDataSourceOptions } from './types';
 
-class AstarteAnnotationsQueryCtrl {
-    static templateUrl = 'partials/annotations.editor.html';
-}
-
-export {
-    AstarteDatasource as Datasource,
-    AstarteQueryCtrl as QueryCtrl,
-    AstarteConfigCtrl as ConfigCtrl,
-    AstarteAnnotationsQueryCtrl as AnnotationsQueryCtrl,
-};
+export const plugin = new DataSourcePlugin<DataSource, AppEngineQuery, AppEngineDataSourceOptions>(DataSource)
+  .setConfigEditor(ConfigEditor)
+  .setQueryEditor(QueryEditor);
