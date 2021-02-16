@@ -8,6 +8,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Datasource automatically adds /v1/ to the Astarte AppEngine URL
 
+## [0.11.4] - 2021-01-26
+
+## [0.11.3] - 2020-09-24
+
+## [0.11.2] - 2020-08-14
+
+## [0.11.1] - 2020-05-18
+
+## [0.11.0] - 2020-04-13
+
+## [0.11.0-rc.1] - 2020-03-26
+
 ## [0.11.0-rc.0] - 2020-02-26
 
 ## [0.11.0-beta.2] - 2020-01-26
