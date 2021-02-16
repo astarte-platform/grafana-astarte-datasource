@@ -17,8 +17,8 @@
         "links": [
             {"name": "Project site", "url": "https://github.com/astarte-platform/grafana-astarte-appengine-datasource"}
         ],
-        "version": "1.0.0-dev",
-        "updated": "2020-02-27"
+        "version": "1.0.0-beta.1",
+        "updated": "2021-02-16"
     },
 
     "dependencies": {
