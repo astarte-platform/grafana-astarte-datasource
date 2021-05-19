@@ -39,24 +39,33 @@ export class QueryEditor extends Component<Props, State> {
     this.state = {
       deviceInterfaces: [],
     };
+
+    this.getDeviceInterfaces(props.query.device);
   }
 
-  onDeviceChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { onChange, query, onRunQuery, datasource } = this.props;
-    const deviceId = event.target.value;
-    onChange({ ...query, device: deviceId });
-    onRunQuery();
-
+  getDeviceInterfaces = (deviceId: string) => {
+    const { datasource } = this.props;
+    if (!deviceId) {
+      return;
+    }
     datasource
       .getDeviceInfo(deviceId)
       .then((deviceInfo) => {
-        console.log(deviceInfo);
         const interfaces = Object.keys(deviceInfo.introspection);
         this.setState({ deviceInterfaces: interfaces });
       })
       .catch(() => {
         this.setState({ deviceInterfaces: [] });
       });
+  };
+
+  onDeviceChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { onChange, query, onRunQuery } = this.props;
+    const deviceId = event.target.value;
+    onChange({ ...query, device: deviceId });
+    onRunQuery();
+
+    this.getDeviceInterfaces(deviceId);
   };
 
   onInterfaceNameChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -95,6 +104,7 @@ export class QueryEditor extends Component<Props, State> {
                 value={interfaceName}
                 onChange={this.onInterfaceSelectionChange}
               >
+                <option value="">Select an interface</option>
                 {deviceInterfaces.map((iface) => (
                   <option key={iface} value={iface}>
                     {iface}
