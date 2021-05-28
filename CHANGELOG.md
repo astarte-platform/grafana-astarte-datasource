@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - Unreleased
+### Fixed
+- Device interface selection from query combobox
+
+## [1.0.0-rc.0] - 2021-05-10
+### Fixed
+- Fix plugin signing
+
+## [1.0.0-beta.2] - 2021-03-24
+### Changed
+- Upgrade Grafana to 7.3.10
+
 ## [1.0.0-beta.1] - 2021-02-16
 ### Changed
 - Datasource automatically adds /v1/ to the Astarte AppEngine URL
@@ -23,6 +35,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [0.11.0-rc.0] - 2020-02-26
 
 ## [0.11.0-beta.2] - 2020-01-26
+
+## [0.10.2] - 2019-12-09
+
+## [0.10.1] - 2019-10-02
 
 ## [0.10.0] - 2019-04-16
 
