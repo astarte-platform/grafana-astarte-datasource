@@ -1,11 +1,24 @@
 module github.com/astarte-platform/grafana-astarte-appengine-datasource
 
-go 1.17
+go 1.18
 
 require github.com/grafana/grafana-plugin-sdk-go v0.129.0
 
 require (
+	github.com/cristalhq/jwt/v3 v3.1.0 // indirect
+	github.com/gopherjs/gopherjs v1.17.2 // indirect
+	github.com/iancoleman/orderedmap v0.2.0 // indirect
+	github.com/jtolds/gls v4.20.0+incompatible // indirect
+	github.com/smartystreets/assertions v1.13.0 // indirect
+	github.com/tidwall/gjson v1.14.4 // indirect
+	github.com/tidwall/match v1.1.1 // indirect
+	github.com/tidwall/pretty v1.2.0 // indirect
+	moul.io/http2curl v1.0.0 // indirect
+)
+
+require (
 	github.com/apache/arrow/go/arrow v0.0.0-20211112161151-bc219186db40 // indirect
+	github.com/astarte-platform/astarte-go v0.90.5-0.20230214113454-81f06f9dd4ca
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/cheekybits/genny v1.0.0 // indirect
