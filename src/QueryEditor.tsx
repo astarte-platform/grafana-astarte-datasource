@@ -2,6 +2,7 @@
    This file is part of Astarte.
 
    Copyright 2021 Ispirata Srl
+   Copyright 2022-2023 SECO Mind Srl
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,120 +17,131 @@
    limitations under the License.
 */
 
-import defaults from 'lodash/defaults';
-
-import React, { ChangeEvent, Component } from 'react';
+import React, { ChangeEvent, useState, useEffect } from 'react';
 import { LegacyForms } from '@grafana/ui';
 import { QueryEditorProps } from '@grafana/data';
 import { DataSource } from './DataSource';
-import { defaultQuery, AppEngineDataSourceOptions, AppEngineQuery } from './types';
+import { AppEngineDataSourceOptions, AppEngineQuery } from './types';
 
 const { FormField } = LegacyForms;
 
 type Props = QueryEditorProps<DataSource, AppEngineQuery, AppEngineDataSourceOptions>;
 
-interface State {
-  deviceInterfaces: string[];
+function isValidQuery(query: AppEngineQuery) {
+  return query.interfaceName !== '' && query.device !== '' && query.path !== '';
 }
 
-export class QueryEditor extends Component<Props, State> {
-  state: State;
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      deviceInterfaces: [],
-    };
+type InterfaceID = {
+  name: string;
+  major: number;
+  minor: number;
+};
 
-    this.getDeviceInterfaces(props.query.device);
-  }
+type AstarteMapping = {
+  endpoint: string;
+};
 
-  getDeviceInterfaces = (deviceId: string) => {
-    const { datasource } = this.props;
-    if (!deviceId) {
-      return;
-    }
+type AstarteInterface = {
+  mappings: AstarteMapping[];
+};
+
+export const QueryEditor = ({ datasource, query, onChange, onRunQuery }: Props) => {
+  const [introspection, setIntrospection] = useState<InterfaceID[]>([]);
+  const [interfaceDefinition, setInterfaceDefinition] = useState<AstarteInterface | null>(null);
+  const { device, interfaceName, path } = query;
+
+  useEffect(() => {
     datasource
-      .getDeviceInfo(deviceId)
-      .then((deviceInfo) => {
-        const interfaces = Object.keys(deviceInfo.introspection);
-        this.setState({ deviceInterfaces: interfaces });
-      })
-      .catch(() => {
-        this.setState({ deviceInterfaces: [] });
+      .getResource('introspection', { device_id: query.device })
+      .then(setIntrospection)
+      .catch((error) => {
+        console.error(error);
+        setIntrospection([]);
       });
-  };
+  }, [datasource, query.device]);
 
-  onDeviceChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { onChange, query, onRunQuery } = this.props;
+  useEffect(() => {
+    if (introspection) {
+      const interfaceID = introspection.find((id) => id.name === interfaceName);
+      if (interfaceName && interfaceID) {
+        datasource
+          .getResource('interface', { name: interfaceName, major: interfaceID.major })
+          .then(setInterfaceDefinition)
+          .catch((error) => {
+            console.error(error);
+            setInterfaceDefinition(null);
+          });
+      } else {
+        setInterfaceDefinition(null);
+      }
+    }
+  }, [datasource, interfaceName, introspection]);
+
+  const onDeviceChange = (event: ChangeEvent<HTMLInputElement>) => {
     const deviceId = event.target.value;
-    onChange({ ...query, device: deviceId });
-    onRunQuery();
-
-    this.getDeviceInterfaces(deviceId);
+    const updatedQuery = { ...query, device: deviceId };
+    onChange(updatedQuery);
+    if (isValidQuery(updatedQuery)) {
+      onRunQuery();
+    }
   };
 
-  onInterfaceNameChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { onChange, query, onRunQuery } = this.props;
-    onChange({ ...query, interfaceName: event.target.value });
-    onRunQuery();
+  const onInterfaceNameChange = (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const updatedQuery = { ...query, interfaceName: event.target.value };
+    onChange(updatedQuery);
+    if (isValidQuery(updatedQuery)) {
+      onRunQuery();
+    }
   };
 
-  onInterfaceSelectionChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    const { onChange, query, onRunQuery } = this.props;
-    onChange({ ...query, interfaceName: event.target.value });
-    onRunQuery();
+  const onPathChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const updatedQuery = { ...query, path: event.target.value };
+    onChange(updatedQuery);
+    if (isValidQuery(updatedQuery)) {
+      onRunQuery();
+    }
   };
 
-  onPathChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { onChange, query, onRunQuery } = this.props;
-    onChange({ ...query, path: event.target.value });
-    onRunQuery();
-  };
+  const interfaces = introspection.map((iid) => iid.name);
+  const endpoints = interfaceDefinition?.mappings.map((m) => m.endpoint);
 
-  render() {
-    const query = defaults(this.props.query, defaultQuery);
-    const { device, interfaceName, path } = query;
-    const { deviceInterfaces } = this.state;
-
-    return (
-      <div className="gf-form">
-        <FormField width={4} value={device} onChange={this.onDeviceChange} label="Device ID" tooltip="The device ID" />
-        {deviceInterfaces.length > 0 ? (
-          <FormField
-            label="Interface"
-            labelWidth={4}
-            inputEl={
-              <select
-                className="gf-form-input width-20"
-                value={interfaceName}
-                onChange={this.onInterfaceSelectionChange}
-              >
-                <option value="">Select an interface</option>
-                {deviceInterfaces.map((iface) => (
-                  <option key={iface} value={iface}>
-                    {iface}
-                  </option>
-                ))}
-              </select>
-            }
-          />
-        ) : (
-          <FormField
-            labelWidth={4}
-            value={interfaceName}
-            onChange={this.onInterfaceNameChange}
-            label="Interface"
-            tooltip="The interface to query"
-          />
-        )}
-        <FormField
-          width={4}
-          value={path}
-          onChange={this.onPathChange}
-          label="Path"
-          tooltip="The interface path to query"
-        />
-      </div>
-    );
-  }
-}
+  return (
+    <div className="gf-form">
+      <FormField width={4} value={device} onChange={onDeviceChange} label="Device ID" tooltip="The device ID" />
+      <FormField
+        width={4}
+        value={interfaceName}
+        onChange={onInterfaceNameChange}
+        label="Interface"
+        tooltip="The interface to query"
+        list={interfaces.length > 0 ? 'interfaceSuggestions' : undefined}
+      />
+      {interfaces.length > 0 && (
+        <datalist id="interfaceSuggestions">
+          {interfaces.map((iface) => (
+            <option key={iface} value={iface}>
+              {iface}
+            </option>
+          ))}
+        </datalist>
+      )}
+      <FormField
+        width={4}
+        value={path}
+        onChange={onPathChange}
+        label="Path"
+        tooltip="The interface path to query"
+        list={endpoints && endpoints.length > 0 ? 'endpointSuggestions' : undefined}
+      />
+      {endpoints && (
+        <datalist id="endpointSuggestions">
+          {endpoints.map((e) => (
+            <option key={e} value={e}>
+              {e}
+            </option>
+          ))}
+        </datalist>
+      )}
+    </div>
+  );
+};

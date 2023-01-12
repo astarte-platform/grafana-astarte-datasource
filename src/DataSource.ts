@@ -1,164 +1,44 @@
-import defaults from 'lodash/defaults';
+/*
+   This file is part of Astarte.
 
-import { getBackendSrv } from '@grafana/runtime';
+   Copyright 2021 Ispirata Srl
+   Copyright 2022-2023 SECO Mind Srl
 
-import {
-  DataQueryRequest,
-  DataQueryResponse,
-  DataSourceApi,
-  DataSourceInstanceSettings,
-  MutableDataFrame,
-  FieldType,
-} from '@grafana/data';
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
 
-import { AppEngineQuery, AppEngineDataSourceOptions, defaultQuery } from './types';
+   http://www.apache.org/licenses/LICENSE-2.0
 
-const REQUEST_SAMPLE_LIMIT = 5000;
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
 
-interface AstarteDatastreamData {
-  timestamps: number[];
-  values: number[];
-}
+import type { DataSourceInstanceSettings, ScopedVars } from '@grafana/data';
+import { DataSourceWithBackend, getTemplateSrv } from '@grafana/runtime';
 
-interface AstarteAppEngineData {
-  data: AstarteDataPoint[];
-}
+import { AppEngineQuery, AppEngineDataSourceOptions } from './types';
 
-interface AstarteDataPoint {
-  timestamp: number;
-  value: number;
-}
-
-interface AstarteDeviceStatus {
-  connected: boolean;
-  introspection: {
-    [interfaceName: string]: {
-      major: number;
-      minor: number;
-    };
-  };
-}
-
-export class DataSource extends DataSourceApi<AppEngineQuery, AppEngineDataSourceOptions> {
-  apiUrl: string;
-  realm: string;
-  token: string;
+export class DataSource extends DataSourceWithBackend<AppEngineQuery, AppEngineDataSourceOptions> {
+  jsonData: AppEngineDataSourceOptions;
 
   constructor(instanceSettings: DataSourceInstanceSettings<AppEngineDataSourceOptions>) {
     super(instanceSettings);
 
-    const { apiUrl, realm, token } = instanceSettings.jsonData;
-    this.apiUrl = apiUrl || '';
-    this.realm = realm || '';
-    this.token = token || '';
+    this.jsonData = instanceSettings.jsonData;
   }
 
-  async getDeviceList(): Promise<string[]> {
-    const queryPath = new URL(`/appengine/v1/${this.realm}/devices`, this.apiUrl);
-    const response = await getBackendSrv().datasourceRequest({
-      method: 'GET',
-      headers: { Authorization: `Bearer ${this.token}` },
-      url: queryPath.toString(),
-    });
-    return response.data;
-  }
-
-  async getDeviceInfo(deviceID: string): Promise<AstarteDeviceStatus> {
-    const queryPath = new URL(`/appengine/v1/${this.realm}/devices/${deviceID}`, this.apiUrl);
-    const response = await getBackendSrv()
-      .datasourceRequest({
-        method: 'GET',
-        headers: { Authorization: `Bearer ${this.token}` },
-        url: queryPath.toString(),
-      })
-      .then((response) => response.data);
-    return response.data;
-  }
-
-  async getDeviceInterfaceData(query: AppEngineQuery, from: number, to: number): Promise<AstarteDatastreamData> {
-    const { device, interfaceName, path = '' } = query;
-    const toISODate = new Date(to).toISOString();
-    const queryPath = new URL(
-      `/appengine/v1/${this.realm}/devices/${device}/interfaces/${interfaceName}/${path}`,
-      this.apiUrl
-    );
-
-    const timestamps: number[] = [];
-    const values: number[] = [];
-    let hasMore = true;
-    let startingTimestamp = from;
-
-    while (hasMore) {
-      const fromISODate = new Date(startingTimestamp).toISOString();
-      const result = await getBackendSrv().datasourceRequest({
-        method: 'GET',
-        headers: { Authorization: `Bearer ${this.token}` },
-        url: queryPath.toString(),
-        params: {
-          keep_milliseconds: true,
-          since: fromISODate,
-          to: toISODate,
-          limit: REQUEST_SAMPLE_LIMIT,
-        },
-      });
-
-      const responseBody: AstarteAppEngineData = result.data;
-      const datapoints: AstarteDataPoint[] = responseBody.data;
-
-      datapoints.forEach((datapoint: AstarteDataPoint) => {
-        timestamps.push(datapoint.timestamp);
-        values.push(datapoint.value);
-      });
-
-      if (datapoints.length < REQUEST_SAMPLE_LIMIT) {
-        hasMore = false;
-      } else {
-        startingTimestamp = datapoints[datapoints.length - 1].timestamp;
-      }
-    }
+  applyTemplateVariables(query: AppEngineQuery, scopedVars: ScopedVars): AppEngineQuery {
+    const apply = (text: string) => getTemplateSrv().replace(text, scopedVars);
 
     return {
-      timestamps,
-      values,
+      ...query,
+      device: apply(query.device),
+      interfaceName: apply(query.interfaceName),
+      path: apply(query.path),
     };
-  }
-
-  async query(options: DataQueryRequest<AppEngineQuery>): Promise<DataQueryResponse> {
-    const { range } = options;
-    const from = range!.from.valueOf();
-    const to = range!.to.valueOf();
-
-    const promises = options.targets
-      .filter((target) => target.device !== '' && target.interfaceName !== '')
-      .map((target) => {
-        const query = defaults(target, defaultQuery);
-        const promise = this.getDeviceInterfaceData(target, from, to).then(
-          (data) =>
-            new MutableDataFrame({
-              refId: query.refId,
-              fields: [
-                { name: 'Time', values: data.timestamps, type: FieldType.time },
-                { name: 'Value', values: data.values, type: FieldType.number },
-              ],
-            })
-        );
-        return promise;
-      });
-
-    return Promise.all(promises).then((data) => ({ data }));
-  }
-
-  async testDatasource() {
-    const result = await this.getDeviceList()
-      .then(() => ({
-        status: 'success',
-        message: 'Success',
-      }))
-      .catch(() => ({
-        status: 'error',
-        message: 'Could not connect to Astarte',
-      }));
-
-    return result;
   }
 }
