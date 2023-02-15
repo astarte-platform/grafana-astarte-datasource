@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.1.0-beta.0] - Unreleased
+### Changes
+- BREAKING: The plugin is now a backend datasource plugin.
+  Many features are now supported, such as e.g. alerting.
+
 ## [1.1.0-alpha.0] - 2022-11-24
 
 ## [1.0.4] - 2022-10-24
