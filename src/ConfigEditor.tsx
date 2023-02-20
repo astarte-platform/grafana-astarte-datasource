@@ -65,8 +65,16 @@ export class ConfigEditor extends PureComponent<Props, State> {
         </div>
         <div className="gf-form">
           <FormField
-            label="Astarte AppEngine token"
+            label="Astarte API token"
             labelWidth={10}
+            tooltip={
+              <div>
+                An Astarte token with read permissions for both AppEngine and Realm Management.
+                <br />
+                If you have access to the realm private key you can generate a token using&nbsp;
+                <a href="https://github.com/astarte-platform/astartectl">astartectl</a>
+              </div>
+            }
             inputEl={
               <textarea
                 className="gf-form-input width-20"
