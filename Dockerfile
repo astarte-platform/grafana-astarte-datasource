@@ -10,7 +10,7 @@ RUN mkdir -p src
 ADD src/plugin.json src
 RUN mage -v
 
-FROM node:14-stretch as jsbuilder
+FROM node:16-bullseye as jsbuilder
 WORKDIR /app
 RUN apt-get -qq update
 RUN apt-get -qq install netbase build-essential autoconf libffi-dev
