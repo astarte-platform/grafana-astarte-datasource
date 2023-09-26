@@ -1,4 +1,4 @@
-FROM node:12-stretch as builder
+FROM node:16-bookworm as builder
 
 WORKDIR /app
 ADD . .
