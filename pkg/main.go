@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/astarte-platform/grafana-astarte-appengine-datasource/pkg/plugin"
+	"github.com/astarte-platform/grafana-astarte-datasource/pkg/plugin"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/datasource"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 )
@@ -17,7 +17,7 @@ func main() {
 	// from Grafana to create different instances of SampleDatasource (per datasource
 	// ID). When datasource configuration changed Dispose method will be called and
 	// new datasource instance created using NewSampleDatasource factory.
-	if err := datasource.Manage("astarte-appengine-datasource", plugin.NewAppEngineDatasource, datasource.ManageOpts{}); err != nil {
+	if err := datasource.Manage("astarte-datasource", plugin.NewAstarteDatasource, datasource.ManageOpts{}); err != nil {
 		log.DefaultLogger.Error(err.Error())
 		os.Exit(1)
 	}

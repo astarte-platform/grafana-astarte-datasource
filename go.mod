@@ -1,4 +1,4 @@
-module github.com/astarte-platform/grafana-astarte-appengine-datasource
+module github.com/astarte-platform/grafana-astarte-datasource
 
 go 1.18
 
