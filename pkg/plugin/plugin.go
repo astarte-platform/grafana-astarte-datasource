@@ -27,40 +27,39 @@ import (
 // is useful to clean up resources used by previous datasource instance when a new datasource
 // instance created upon datasource settings changed.
 var (
-	_ backend.QueryDataHandler    = (*AppEngineDatasource)(nil)
-	_ backend.CheckHealthHandler  = (*AppEngineDatasource)(nil)
-	_ backend.CallResourceHandler = (*AppEngineDatasource)(nil)
+	_ backend.QueryDataHandler    = (*AstarteDatasource)(nil)
+	_ backend.CheckHealthHandler  = (*AstarteDatasource)(nil)
+	_ backend.CallResourceHandler = (*AstarteDatasource)(nil)
 	// We're not interested in streaming
 	// _ backend.StreamHandler         = (*SampleDatasource)(nil)
-	_ instancemgmt.InstanceDisposer = (*AppEngineDatasource)(nil)
+	_ instancemgmt.InstanceDisposer = (*AstarteDatasource)(nil)
 )
 
-type appEngineDataSourceSourceSettings struct {
+type astarteDataSourceSourceSettings struct {
 	ApiUrl string `json:"apiUrl"`
 	Realm  string `json:"realm"`
 	Token  string `json:"token"`
 }
 
-func newAppEngineDatasourceSettings(instanceSettings backend.DataSourceInstanceSettings) (appEngineDataSourceSourceSettings, error) {
-	var settings appEngineDataSourceSourceSettings
+func newAstarteDatasourceSettings(instanceSettings backend.DataSourceInstanceSettings) (astarteDataSourceSourceSettings, error) {
+	var settings astarteDataSourceSourceSettings
 	if err := json.Unmarshal(instanceSettings.JSONData, &settings); err != nil {
-		return appEngineDataSourceSourceSettings{}, err
+		return astarteDataSourceSourceSettings{}, err
 	}
 	return settings, nil
 }
 
-// NewAppEngineDatasource creates a new datasource instance.
-func NewAppEngineDatasource(settings backend.DataSourceInstanceSettings) (instancemgmt.Instance, error) {
-	log.DefaultLogger.Info("NewAppEngineDatasource called with", "backend_settings", settings)
+// NewAstarteDatasource creates a new datasource instance.
+func NewAstarteDatasource(settings backend.DataSourceInstanceSettings) (instancemgmt.Instance, error) {
+	log.DefaultLogger.Info("NewAstarteDatasource called with", "backend_settings", settings)
 
-	datasource := &AppEngineDatasource{}
-	dsSettings, err := newAppEngineDatasourceSettings(settings)
+	datasource := &AstarteDatasource{}
+	dsSettings, err := newAstarteDatasourceSettings(settings)
 	if err != nil {
 		log.DefaultLogger.Error("Cannot read settings", "error", err)
 		return nil, err
 	}
 
-	// If localhost is used, one must hardcode AppEngine, Realm Management URLs and no SSL
 	astarteAPIClient, err := client.New(
 		client.WithBaseURL(dsSettings.ApiUrl),
 		client.WithJWT(dsSettings.Token),
@@ -77,16 +76,16 @@ func NewAppEngineDatasource(settings backend.DataSourceInstanceSettings) (instan
 	return datasource, nil
 }
 
-// AppEngineDatasource is a datasource which can respond to data queries and reports its health.
-type AppEngineDatasource struct {
+// AstarteDatasource is a datasource which can respond to data queries and reports its health.
+type AstarteDatasource struct {
 	astarteAPIClient *client.Client
 	realm            string
 }
 
 // Dispose here tells plugin SDK that plugin wants to clean up resources when a new instance
 // created. As soon as datasource settings change detected by SDK old datasource instance will
-// be disposed and a new one will be created using NewAppEngineDatasource factory function.
-func (d *AppEngineDatasource) Dispose() {
+// be disposed and a new one will be created using NewAstarteDatasource factory function.
+func (d *AstarteDatasource) Dispose() {
 	// Delete the client (the one with AppEngine address and token)
 	log.DefaultLogger.Info("Disposing of", "appengine_datasource", d)
 	// Clean up datasource instance resources.
@@ -96,7 +95,7 @@ func (d *AppEngineDatasource) Dispose() {
 // req contains the queries []DataQuery (where each query contains RefID as a unique identifier).
 // The QueryDataResponse contains a map of RefID to the response for each query, and each response
 // contains Frames ([]*Frame).
-func (d *AppEngineDatasource) QueryData(ctx context.Context, req *backend.QueryDataRequest) (*backend.QueryDataResponse, error) {
+func (d *AstarteDatasource) QueryData(ctx context.Context, req *backend.QueryDataRequest) (*backend.QueryDataResponse, error) {
 	log.DefaultLogger.Debug("QueryData called", "request", req)
 
 	// create response struct
@@ -121,7 +120,7 @@ type queryModel struct {
 	Path          string `json:"path"`
 }
 
-func (d *AppEngineDatasource) query(_ context.Context, pCtx backend.PluginContext, query backend.DataQuery) backend.DataResponse {
+func (d *AstarteDatasource) query(_ context.Context, pCtx backend.PluginContext, query backend.DataQuery) backend.DataResponse {
 	response := backend.DataResponse{}
 
 	// Unmarshal the JSON into our queryModel.
@@ -214,7 +213,7 @@ func (d *AppEngineDatasource) query(_ context.Context, pCtx backend.PluginContex
 // The main use case for these health checks is the test button on the
 // datasource configuration page which allows users to verify that
 // a datasource is working as expected.
-func (d *AppEngineDatasource) CheckHealth(_ context.Context, req *backend.CheckHealthRequest) (*backend.CheckHealthResult, error) {
+func (d *AstarteDatasource) CheckHealth(_ context.Context, req *backend.CheckHealthRequest) (*backend.CheckHealthResult, error) {
 	log.DefaultLogger.Debug("CheckHealth called", "request", req)
 
 	// Run an actual query to Astarte, so that our JWT is checked, too
@@ -240,7 +239,7 @@ func (d *AppEngineDatasource) CheckHealth(_ context.Context, req *backend.CheckH
 	}, nil
 }
 
-func (d *AppEngineDatasource) CallResource(ctx context.Context, req *backend.CallResourceRequest, sender backend.CallResourceResponseSender) error {
+func (d *AstarteDatasource) CallResource(ctx context.Context, req *backend.CallResourceRequest, sender backend.CallResourceResponseSender) error {
 	log.DefaultLogger.Debug("CallResource  called", "request", req)
 
 	u, _ := url.Parse(req.URL)
@@ -269,7 +268,7 @@ func (d *AppEngineDatasource) CallResource(ctx context.Context, req *backend.Cal
 	}
 }
 
-func (d *AppEngineDatasource) getInterface(interfaceName string, interfaceMajor int) (interfaces.AstarteInterface, error) {
+func (d *AstarteDatasource) getInterface(interfaceName string, interfaceMajor int) (interfaces.AstarteInterface, error) {
 	getInterfaceCall, err := d.astarteAPIClient.GetInterface(d.realm, interfaceName, interfaceMajor)
 	if err != nil {
 		log.DefaultLogger.Error("Can't query the server for interface", "err", err, "interface", interfaceName, "interfaceMajor", interfaceMajor)
@@ -301,7 +300,7 @@ type introspectionEntry struct {
 	Minor int    `json:"minor"`
 }
 
-func (d *AppEngineDatasource) getDeviceIntrospection(deviceID string) ([]introspectionEntry, error) {
+func (d *AstarteDatasource) getDeviceIntrospection(deviceID string) ([]introspectionEntry, error) {
 	getDeviceDetailsCall, err := d.astarteAPIClient.GetDeviceDetails(d.realm, deviceID, client.AstarteDeviceID)
 	if err != nil {
 		log.DefaultLogger.Error("Can't query the server for device introspection", "err", err, "device_id", deviceID)
