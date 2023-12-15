@@ -1,22 +1,23 @@
 {
+  "name": "Astarte Datasource",
+  "id": "astarte-datasource",
   "$schema": "https://raw.githubusercontent.com/grafana/grafana/master/docs/sources/developers/plugins/plugin.schema.json",
   "type": "datasource",
-  "name": "Astarte AppEngine",
-  "id": "astarte-appengine-datasource",
   "metrics": true,
   "backend": true,
   "alerting": true,
-  "executable": "gpx_astarte-appengine-datasource",
+  "executable": "gpx_astarte-datasource",
   "info": {
-    "description": "Open source data orchestration platform",
+    "description": "Grafana Datasource Plugin for the Astarte open source data orchestration platform",
     "author": {
       "name": "SECO Mind",
       "url": "https://secomind.com"
     },
     "keywords": [
       "astarte",
-      "appengine",
-      "datasource"
+      "datasource",
+      "iot",
+      "data orchestration"
     ],
     "logos": {
       "small": "img/logo_small.png",
@@ -24,20 +25,23 @@
     },
     "links": [
       {
-        "name": "Project site",
-        "url": "https://github.com/astarte-platform/grafana-astarte-appengine-datasource"
+        "name": "GitHub",
+        "url": "https://github.com/astarte-platform/grafana-astarte-datasource"
       },
       {
         "name": "License",
-        "url": "https://github.com/astarte-platform/grafana-astarte-appengine-datasource/blob/master/LICENSE"
+        "url": "https://github.com/astarte-platform/grafana-astarte-datasource/blob/master/LICENSE"
       }
     ],
-    "screenshots": [],
     "version": "%VERSION%",
-    "updated": "%TODAY%"
+    "updated": "%TODAY%",
+    "screenshots": [
+      {"name": "Query Editor", "path": "img/board.png"},
+      {"name": "Configuration", "path": "img/config.png"}
+    ]
   },
   "dependencies": {
-    "grafanaVersion": ">=7.0.0",
+    "grafanaDependency": ">=8.0.0",
     "plugins": []
   }
 }
