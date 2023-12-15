@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2023-11-09
+
+## [1.1.0] - 2023-06-20
+
+## [1.1.0-rc.0] - 2023-06-09
+### Changed
+- Use node:16-bullseye as js builder.
+
+## [1.1.0-beta.0] - 2023-02-20
+### Changes
+- BREAKING: The plugin is now a backend datasource plugin.
+  Many features are now supported, such as e.g. alerting.
+
+## [1.1.0-alpha.0] - 2022-11-24
+
+## [1.0.5] - 2023-09-25
+
 ## [1.0.4] - 2022-10-24
 
 ## [1.0.3] - 2022-07-04

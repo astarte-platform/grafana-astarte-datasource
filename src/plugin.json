@@ -1,14 +1,18 @@
 {
+  "$schema": "https://raw.githubusercontent.com/grafana/grafana/master/docs/sources/developers/plugins/plugin.schema.json",
   "type": "datasource",
   "name": "Astarte AppEngine",
   "id": "astarte-appengine-datasource",
   "metrics": true,
+  "backend": true,
+  "alerting": true,
+  "executable": "gpx_astarte-appengine-datasource",
   "info": {
     "description": "Open source data orchestration platform",
-     "author": {
-       "name": "Ispirata",
-       "url": "https://www.ispirata.com/"
-     },
+    "author": {
+      "name": "SECO Mind",
+      "url": "https://secomind.com"
+    },
     "keywords": [
       "astarte",
       "appengine",
@@ -33,7 +37,7 @@
     "updated": "%TODAY%"
   },
   "dependencies": {
-    "grafanaVersion": "6.5.x",
+    "grafanaVersion": ">=7.0.0",
     "plugins": []
   }
 }
